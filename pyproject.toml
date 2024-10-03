@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "discord-sealweb3-bot"
+version = "0.1.0"
+description = "It is a bot for discord that allows you to generate certificates"
+authors = ["oriojas <oscarriojas@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+discord-py = "^2.4.0"
+python-dotenv = "^1.0.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
