@@ -1,6 +1,7 @@
 import os
 import json
 import discord
+import asyncio
 from dotenv import load_dotenv
 from discord.ext import commands
 from datetime import datetime, timedelta
@@ -18,6 +19,7 @@ with open('secret_word.json', 'r') as f:
 
 event_active = False
 event_end_time = None
+event_time = 2
 
 @bot.event
 async def on_ready():
@@ -27,24 +29,24 @@ async def on_ready():
 async def sealEvent(ctx):
     global event_active, event_end_time
     event_active = True
-    event_end_time = datetime.now() + timedelta(minutes=60)
-    await ctx.send("Evento creado. El comando !seal estará disponible por 60 minutos.")
+    event_end_time = datetime.now() + timedelta(minutes=event_time)
+    await ctx.send(f"Event created. The !seal command will be available for {event_time} minutes.")
 
 @bot.command()
-async def seal(ctx, *args):
+async def seal(ctx):
     global event_active, event_end_time
 
     if not event_active:
-        await ctx.send("No se ha creado el evento. Usa !sealEvent primero.")
+        await ctx.send("No event has been created yet. Use !sealEvent first.")
         return
 
     if datetime.now() > event_end_time:
         event_active = False
-        await ctx.send("El evento ha terminado.")
+        await ctx.send("The event has ended.")
         return
 
-    if len(args) == 0 or args[0] != secret_word:
-        await ctx.send("Palabra secreta incorrecta o no proporcionada.")
+    if len(ctx.message.content.split()) < 2 or ctx.message.content.split()[1] != secret_word:
+        await ctx.send("Incorrect or no secret word provided.")
         return
 
     user = ctx.author
@@ -53,19 +55,46 @@ async def seal(ctx, *args):
     user_data = {
         "name": user.name,
         "id": str(user.id),
-        "email": email
+        "email": email,
+        "wallet": None
     }
 
-    try:
-        with open('users.json', 'r+') as f:
-            data = json.load(f)
-            data.append(user_data)
-            f.seek(0)
-            json.dump(data, f, indent=4)
-    except FileNotFoundError:
-        with open('users.json', 'w') as f:
-            json.dump([user_data], f, indent=4)
+    confirm_message = await ctx.send("Please, send your wallet:")
 
-    await ctx.send(f"Usuario {user.name} registrado correctamente.")
+    try:
+        message = await bot.wait_for('message', timeout=60.0, check=lambda m: m.author == user and m.channel == ctx.channel)
+        if len(message.content.split()) < 1:
+            await ctx.send("Wallet not sent.")
+            return
+        user_data["wallet"] = message.content.split()[0]
+    except asyncio.TimeoutError:
+        await ctx.send("Time to send wallet has run out.")
+        return
+
+    confirm_message = await ctx.send("Please, send your email:")
+
+    try:
+        message = await bot.wait_for('message', timeout=60.0, check=lambda m: m.author == user and m.channel == ctx.channel)
+        if len(message.content.split()) < 1:
+            await ctx.send("Email not sent.")
+            return
+        user_data["email"] = message.content.split()[0]
+    except asyncio.TimeoutError:
+        await ctx.send("Time to send email has run out.")
+        return
+
+    try:
+        with open('users.json', 'r+') as json_file:
+            data = json.load(json_file)
+            data.append(user_data)
+            json_file.seek(0)
+            json.dump(data, json_file, indent=4)
+    except FileNotFoundError:
+        with open('users.json', 'w') as json_file:
+            json.dump([user_data], json_file, indent=4)
+
+    await ctx.send(f"{user.name} user registered successfully.")
+
+
 
 bot.run(DISCORD_TOKEN)
