@@ -10,7 +10,7 @@ readme = "README.md"
 python = "^3.10"
 discord-py = "^2.4.0"
 python-dotenv = "^1.0.1"
-fastapi = "^0.115.0"
+flask = "^3.0.3"
 
 
 [build-system]

@@ -95,6 +95,4 @@ async def seal(ctx):
 
     await ctx.send(f"{user.name} user registered successfully.")
 
-
-
 bot.run(DISCORD_TOKEN)
