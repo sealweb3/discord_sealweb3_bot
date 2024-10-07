@@ -23,9 +23,10 @@ event_time = 2
 
 @bot.event
 async def on_ready():
-    print(f'{bot.user} ha iniciado sesión!')
+    print(f'{bot.user} start sesión!')
 
 @bot.command()
+@commands.has_role('Admin')  # Solo los usuarios con el rol 'Admin' pueden ejecutar este comando
 async def sealEvent(ctx):
     global event_active, event_end_time
     event_active = True
@@ -95,4 +96,80 @@ async def seal(ctx):
 
     await ctx.send(f"{user.name} user registered successfully.")
 
+# Comando para mostrar el botón de registro
+@bot.command()
+async def register(ctx):
+    global event_active, event_end_time
+    if not event_active:
+        await ctx.send("No event has been created yet. Use !sealEvent first.")
+        return
+
+    if datetime.now() > event_end_time:
+        event_active = False
+        await ctx.send("The event has ended.")
+        return
+
+    await ctx.send("Press button for register in the event.", view=RegistroButtonView())
+
+class RegistroModal(discord.ui.Modal, title="Registro del Evento"):
+    
+    secretWord = discord.ui.TextInput(
+        label="Secret Word",
+        style=discord.TextStyle.short,
+        placeholder="Insert your secret Word",
+        required=True,
+        max_length=100
+    )
+
+    mail = discord.ui.TextInput(
+        label="Mail",
+        style=discord.TextStyle.short,
+        placeholder="Insert your mail",
+        required=True,
+        max_length=100
+    )
+    
+    wallet = discord.ui.TextInput(
+        label="Wallet by NFT",
+        style=discord.TextStyle.short,
+        placeholder="Insert your wallet wallet",
+        required=True,
+        max_length=100
+    )
+
+    async def on_submit(self, interaction: discord.Interaction):
+
+        if self.secretWord.value != secret_word:
+            await interaction.response.send_message(f"Incorrect or no secret word provided.")
+            return
+        
+        user_data = {
+            "name": interaction.user.display_name,
+            "id": str(interaction.user.id),
+            "email": self.mail.value,
+            "wallet": self.wallet.value.lower()
+        }
+
+        # Guardar los datos en users.json
+        try:
+            with open('users.json', 'r+') as json_file:
+                data = json.load(json_file)
+                data.append(user_data)
+                json_file.seek(0)
+                json.dump(data, json_file, indent=4)
+        except FileNotFoundError:
+            with open('users.json', 'w') as json_file:
+                json.dump([user_data], json_file, indent=4)
+
+        await interaction.response.send_message(f"¡Thanks {interaction.user.name}! user registered successfully.")
+
+# Clase para el botón
+class RegistroButtonView(discord.ui.View):
+    @discord.ui.button(label="Register in the event", style=discord.ButtonStyle.green)
+    async def registrar(self, interaction: discord.Interaction, button: discord.ui.Button):
+        # Abrir la ventana modal cuando se presiona el botón
+        await interaction.response.send_modal(RegistroModal())
+
+# Iniciar el bot
 bot.run(DISCORD_TOKEN)
+
