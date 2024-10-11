@@ -1,7 +1,6 @@
 import os
 import json
 import discord
-import asyncio
 from dotenv import load_dotenv
 from discord.ext import commands
 from datetime import datetime, timedelta
@@ -20,6 +19,8 @@ with open('secret_word.json', 'r') as f:
 event_active = False
 event_end_time = None
 event_time = 2
+locaselect = ''
+
 
 @bot.event
 async def on_ready():
@@ -28,74 +29,28 @@ async def on_ready():
 @bot.command()
 @commands.has_role('Admin')  # Solo los usuarios con el rol 'Admin' pueden ejecutar este comando
 async def sealEvent(ctx):
-    global event_active, event_end_time
-    event_active = True
-    event_end_time = datetime.now() + timedelta(minutes=event_time)
-    await ctx.send(f"Event created. The !seal command will be available for {event_time} minutes.")
+    await ctx.send("Select location.", view=MySelectMenu())
+    
 
 @bot.command()
-async def seal(ctx):
-    global event_active, event_end_time
+@commands.has_role('Admin')  # Solo los usuarios con el rol 'Admin' pueden ejecutar este comando
+async def attest(ctx):
+    await ctx.send("To attest your identity, please visit [sealweb3.com](https://sealweb3.com) and follow the verification process")
 
-    if not event_active:
-        await ctx.send("No event has been created yet. Use !sealEvent first.")
-        return
 
-    if datetime.now() > event_end_time:
-        event_active = False
-        await ctx.send("The event has ended.")
-        return
-
-    if len(ctx.message.content.split()) < 2 or ctx.message.content.split()[1] != secret_word:
-        await ctx.send("Incorrect or no secret word provided.")
-        return
-
-    user = ctx.author
-    email = f"{user.name}@example.com"
-
-    user_data = {
-        "name": user.name,
-        "id": str(user.id),
-        "email": email,
-        "wallet": None
-    }
-
-    confirm_message = await ctx.send("Please, send your wallet:")
-
-    try:
-        message = await bot.wait_for('message', timeout=60.0, check=lambda m: m.author == user and m.channel == ctx.channel)
-        if len(message.content.split()) < 1:
-            await ctx.send("Wallet not sent.")
-            return
-        user_data["wallet"] = message.content.split()[0]
-    except asyncio.TimeoutError:
-        await ctx.send("Time to send wallet has run out.")
-        return
-
-    confirm_message = await ctx.send("Please, send your email:")
-
-    try:
-        message = await bot.wait_for('message', timeout=60.0, check=lambda m: m.author == user and m.channel == ctx.channel)
-        if len(message.content.split()) < 1:
-            await ctx.send("Email not sent.")
-            return
-        user_data["email"] = message.content.split()[0]
-    except asyncio.TimeoutError:
-        await ctx.send("Time to send email has run out.")
-        return
-
-    try:
-        with open('users.json', 'r+') as json_file:
-            data = json.load(json_file)
-            data.append(user_data)
-            json_file.seek(0)
-            json.dump(data, json_file, indent=4)
-    except FileNotFoundError:
-        with open('users.json', 'w') as json_file:
-            json.dump([user_data], json_file, indent=4)
-
-    await ctx.send(f"{user.name} user registered successfully.")
-
+@bot.command()
+@commands.has_role('Admin')  # Solo los usuarios con el rol 'Admin' pueden ejecutar este comando
+async def reset(ctx):
+    global event_active
+    event_active = False
+    
+    # Borrar el archivo users.json si existe
+    if os.path.exists('users.json'):
+        os.remove('users.json')
+        await ctx.send("Datos de usuarios y estados reseteados correctamente. El archivo users.json ha sido eliminado.")
+    else:
+        await ctx.send("No hay datos de usuarios para eliminar.")
+    
 # Comando para mostrar el botón de registro
 @bot.command()
 async def register(ctx):
@@ -106,12 +61,13 @@ async def register(ctx):
 
     if datetime.now() > event_end_time:
         event_active = False
+        image_active = False
         await ctx.send("The event has ended.")
         return
 
     await ctx.send("Press button for register in the event.", view=RegistroButtonView())
 
-class RegistroModal(discord.ui.Modal, title="Registro del Evento"):
+class RegistroModal(discord.ui.Modal, title="Event register"):
     
     secretWord = discord.ui.TextInput(
         label="Secret Word",
@@ -154,21 +110,114 @@ class RegistroModal(discord.ui.Modal, title="Registro del Evento"):
         try:
             with open('users.json', 'r+') as json_file:
                 data = json.load(json_file)
-                data.append(user_data)
+                event = data[0]
+                if "participants" not in event:
+                    event["participants"] = []
+                event["participants"].append(user_data)
+
                 json_file.seek(0)
                 json.dump(data, json_file, indent=4)
+                json_file.truncate()  # Asegurar que se borre contenido anterior que no se use
+
         except FileNotFoundError:
-            with open('users.json', 'w') as json_file:
-                json.dump([user_data], json_file, indent=4)
+            await interaction.response.send_message("Error: No se encontró el archivo de eventos.", ephemeral=True)
+            return
 
         await interaction.response.send_message(f"¡Thanks {interaction.user.name}! user registered successfully.")
 
-# Clase para el botón
+# Class for button
 class RegistroButtonView(discord.ui.View):
     @discord.ui.button(label="Register in the event", style=discord.ButtonStyle.green)
     async def registrar(self, interaction: discord.Interaction, button: discord.ui.Button):
         # Abrir la ventana modal cuando se presiona el botón
-        await interaction.response.send_modal(RegistroModal())
+        if event_active:
+            await interaction.response.send_modal(RegistroModal())
+
+class EventButtonView(discord.ui.View):
+    @discord.ui.button(label="Create event", style=discord.ButtonStyle.green)
+    async def create(self, interaction: discord.Interaction, button: discord.ui.Button):
+        # Abrir la ventana modal cuando se presiona el botón
+        if not event_active:
+            await interaction.response.send_modal(CreateEventModal())
+
+class MySelectMenu(discord.ui.View):
+    @discord.ui.select(placeholder="location", min_values=1, max_values=1, options=[
+        discord.SelectOption(label="Online", description="Event online"),
+        discord.SelectOption(label="In person", description="Event in person"),
+        discord.SelectOption(label="Mixed", description="Event will be onlina and in person")
+    ])
+    async def select_callback(self, interaction: discord.Interaction, select: discord.ui.Select):
+        locaselect = select.values[0]
+        await interaction.response.send_message("Is neccesary push in create event", view=EventButtonView())
+
+
+# Class for modal create event
+
+class CreateEventModal(discord.ui.Modal, title="Create event"):
+
+    name = discord.ui.TextInput(
+        label="Event name",
+        style=discord.TextStyle.short,
+        placeholder="Insert name event",
+        required=True,
+        max_length=100
+    )
+
+    description = discord.ui.TextInput(
+        label="Event description",
+        style=discord.TextStyle.long,
+        placeholder="Description the event",
+        required=True
+    )
+
+    event_link = discord.ui.TextInput(
+        label="Event Link",
+        style=discord.TextStyle.short,
+        placeholder="Event Link",
+        required=True
+    )
+
+    partners = discord.ui.TextInput(
+        label="partners (separated by commas)",
+        style=discord.TextStyle.short,
+        placeholder="partners by event",
+        required=False
+    )
+
+    image = discord.ui.TextInput(
+        label="Image link",
+        style=discord.TextStyle.short,
+        placeholder="Image link",
+        required=True,
+    )
+    
+
+    async def on_submit(self, interaction: discord.Interaction):
+        global event_end_time, event_time, event_active
+        global locaselect
+        event_data = {
+            "name": self.name.value,
+            "description": self.description.value,
+            "date": str(datetime.now()),
+            "location": locaselect,
+            "partners": self.partners.value.split(",") if self.partners.value else [],
+            "event_link": self.event_link.value,
+            "linked_attestation_id": "quemado",
+            "imagen": self.image.value,
+        }
+        try:
+            with open('users.json', 'r+') as json_file:
+                data = json.load(json_file)
+                data.append(event_data)
+                json_file.seek(0)
+                json.dump(data, json_file, indent=4)
+        except FileNotFoundError:
+            with open('users.json', 'w') as json_file:
+                json.dump([event_data], json_file, indent=4)
+
+        event_active = True
+        event_end_time = datetime.now() + timedelta(minutes=event_time)
+        await interaction.response.send_message(f"Event create.")
 
 # Iniciar el bot
 bot.run(DISCORD_TOKEN)

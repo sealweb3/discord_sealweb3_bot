@@ -1,11 +1,14 @@
 import os
 import json
+from flask_cors import CORS
 from dotenv import load_dotenv
 from flask import Flask, jsonify
 
 load_dotenv()
 
 app = Flask(__name__)
+
+CORS(app)
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 MAIN_DIR = os.getenv('MAIN_DIR')

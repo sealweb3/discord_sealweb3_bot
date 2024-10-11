@@ -1,0 +1,138 @@
+location = discord.ui.Select(
+        label="location",
+        options=[
+            discord.SelectOption(label="Online", description="Online"),
+            discord.SelectOption(label="In person", description="In person"),
+            discord.SelectOption(label="Mixed", description="Mixed")
+        ],
+        placeholder="Select type event",
+        required=True
+    )
+
+datos ingresados por usuarios
+
+[
+  {
+    "date": "2024-10-11 01:26:22.395275",
+    "description": "Descentralized Finance Session",
+    "event_link": "https://meet.google.com/bcb-wtqo-ynv?authuser=0",
+    "imagen": "https://www.google.com/search?q=imagenes&rlz=1C5CHFA_enCO1039CO1040&oq=image&gs_lcrp=EgZjaHJvbWUqBwgBEAAYgAQyBggAEEUYOTIHCAEQABiABDIHCAIQABiABDIHCAMQABiABDIHCAQQABiABDIHCAUQABiABDIGCAYQRRg9MgYIBxBFGD3SAQgyMzAwajBqN6gCALACAA&sourceid=chrome&ie=UTF-8",
+    "linked_attestation_id": "quemado",
+    "location": "",
+    "name": "Session2 | DeFi",
+    "partners": [
+      "Base",
+      " Ethereum Foundation",
+      " EducatETH",
+      " UxTIC"
+    ]
+  },
+  {
+    "email": "oscarriojas@mail.com",
+    "id": "476039547809955851",
+    "name": "Oriojas",
+    "wallet": "0xa92d504731aa3e99df20ffd200ed03f9a55a6219"
+  },
+  {
+    "email": "4chanchi@gmail.com",
+    "id": "1016459386568327310",
+    "name": "Andres Chanchi",
+    "wallet": "0x6da463c076efe2b7352bf72d166ba105855e39b0"
+  },
+  {
+    "email": "jhon99mendoza@gmail.com",
+    "id": "756716440119279656",
+    "name": "Jhon_Mendoza",
+    "wallet": "0xeb294f8e6699115fab9959b42cd88bcacfa6f9db"
+  },
+  {
+    "email": "douglasquiva@gmail.com",
+    "id": "1195797976371699763",
+    "name": "douglas1quiva",
+    "wallet": "0x56d2ea63af338150073b7c63f22760c129f2c91e"
+  },
+  {
+    "email": "paalreto@gmail.com",
+    "id": "947211207113326622",
+    "name": "Paula",
+    "wallet": "0xfcdb22183239117d7c94fdbf91ffe491863f4985"
+  },
+  {
+    "email": "danistilop@gmail.com",
+    "id": "661187393260486706",
+    "name": "Stiven Carmona",
+    "wallet": "0xe6b32281de97aa20a490753e034785bb00c3fb47"
+  },
+  {
+    "email": "yolfry@gmail.com",
+    "id": "340048225937391616",
+    "name": "TYME",
+    "wallet": "0xb731736b1e8c49ef3aefdd1c2613e955ccedf68a"
+  },
+  {
+    "email": "jeanmunoz.eth@gmail.com",
+    "id": "689135448094015523",
+    "name": "jeanette mu\u00f1oz",
+    "wallet": "0x91c0132b0ce862af2998535b91514746945eb342"
+  },
+  {
+    "email": "hola@educateth.com",
+    "id": "794468259227369493",
+    "name": "Julio Cesar | ETH",
+    "wallet": "educateth.base.eth"
+  },
+  {
+    "email": "ferkymel@gmail.com",
+    "id": "1280987391720689677",
+    "name": "Fenry",
+    "wallet": "0xd2c3e8d3ed6effbf3c5acde4f3cabb3b5a59dd49"
+  },
+  {
+    "email": "nyza495@gmail.com",
+    "id": "1146677287199191100",
+    "name": "nyza",
+    "wallet": "0xad1564955b6140723ebf1e786e92d8059e22a926"
+  },
+  {
+    "email": "victormrq0403@gmail.com",
+    "id": "733021683996164187",
+    "name": "VictorM04",
+    "wallet": "0x79f195ec41bd136d76d85295c0d6568352f2b05a"
+  },
+  {
+    "email": "julietta.julieta@gmail.com",
+    "id": "1282002338122432595",
+    "name": "Julietta",
+    "wallet": "0x92a4a7ca38420aa265723701aa5e567f58b6712c"
+  },
+  {
+    "email": "virguezpsi@gmail.com",
+    "id": "854696065400176680",
+    "name": "Jos\u00e9 virguez",
+    "wallet": "0x0c2d71476833ecbedcc938745c04e0ced3bf58cc"
+  },
+  {
+    "email": "sameskida@gmail.com",
+    "id": "783735102575345676",
+    "name": "Sa Meskida",
+    "wallet": "0x4907196f8a1c3edf9e2dfab736b9a7b893ea1bfb"
+  },
+  {
+    "email": "dlgt1606@gmail.com",
+    "id": "715698535584235570",
+    "name": "bacucan1606",
+    "wallet": "0x172104dec113769a5e9a6e00a99e037a42b2778c"
+  },
+  {
+    "email": "clauditagarcia@gmail.com",
+    "id": "1037105037526192220",
+    "name": "Clau Garc\u00eda Dos Santos",
+    "wallet": "0xae2afd986c79dfb8dbc8d88d0d4e6bb25a749726"
+  }
+]
+
+
+    
+
+
+
